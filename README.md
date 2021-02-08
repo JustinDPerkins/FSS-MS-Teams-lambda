@@ -1,4 +1,3 @@
-# FSS
 # Post Scan Action - MS Teams Notification
 
 After a scan occurs and a malicious file is detected, this example Lambda function sends out a notification to Microsoft Teams using Amazon Simple Notification Service.
