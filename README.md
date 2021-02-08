@@ -90,7 +90,7 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
     - In the drop-down list, select the execution role you created earlier. Example: `FSS_Lambda_Teams_Notification_Role`.
     - Click **Create function** and leave the page open.
 2. **Add function code**
-    - Download the Lambda function [handler.py file from GitHub](https://github.com/trendmicro/cloudone-filestorage-plugins/blob/master/post-scan-actions/aws-python-slack-notification/handler.py).
+    - Download the Lambda function [handler.py file from GitHub](https://github.com/JustinDPerkins/FSS/blob/main/handler.py).
     - On the AWS console page you left open, in the **Function code** section, remove the sample Lambda function code and paste the code from `handler.py`.
     - Click **Save** and leave the page open.
 3. **Add environment variables**
@@ -114,7 +114,7 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 <details>
 <summary>Using the AWS CLI</summary>
 
-1. Download the Lambda function [handler.py file from GitHub](https://github.com/trendmicro/cloudone-filestorage-plugins/blob/master/post-scan-actions/aws-python-slack-notification/handler.py).
+1. Download the Lambda function [handler.py file from GitHub](https://github.com/JustinDPerkins/FSS/blob/main/handler.py).
 2. In a shell program, create a deployment package:
 
     `zip <YOUR_ZIP_NAME>.zip handler.py`
