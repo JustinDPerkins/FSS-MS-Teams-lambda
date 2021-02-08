@@ -15,7 +15,7 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
     - Search `Incoming WebHooks`.
     - Click 'Configure' 
     - Create a name for the Teams WebHook, ex 'TM-FSS'
-    - Click on `Create'
+    - Click on 'Create'
     - Copy Webhook URL
     
     [Additional information](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)
