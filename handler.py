@@ -27,24 +27,53 @@ def lambda_handler(event, context):
                 malwares.append(finding.get('malware'))
                 types.append(finding.get('type'))
 
-            body_text = textwrap.dedent('''
-            WARNING
-            AWS Account ID: {account}
-            File URL: {file_url}
-            Malware Name(s): {malwares}
-            Malware Type(s): {types}
-            ''').format(
-            account=str(account_id),
-            file_url=str(message['file_url']),
-            malwares=', '.join(malwares),
+            account=str(account_id)
+            
+            malwares=', '.join(malwares)
+            
             types=', '.join(types)
-            )
+            
+            file_url=str(message['file_url'])
+            
             
             payload = {
-                        "channel": channel,
-                        "text": body_text,
-                        "icon_emoji": ":rotating_light:"
-                        }
+                       "summary":"New Salesforce Lead",   
+                       "sections":[
+                          {
+                             "activityTitle":"A <b>Malicous object</b> has been detected!"
+                          },
+                          {
+                             "facts":[
+                                {
+                                   "name":"Account ID:",
+                                   "value":account
+                                },
+                                {
+                                   "name":"File Name:",
+                                   "value":malwares
+                                },
+                                {
+                                   "name":"Malware Type:",
+                                   "value":types
+                                },
+                                {
+                                   "name":"Location:",
+                                   "value":file_url
+                                }
+                             ]
+                          }
+                       ],
+                       "potentialAction":[
+                          {
+                             "@context":"http://schema.org",
+                             "@type":"ViewAction",
+                             "name":"View Object",
+                             "target":[
+                                file_url
+                             ]
+                          }
+                       ]
+                    }
             
             encoded_msg = json.dumps(payload).encode('utf-8')
             resp = http.request('POST',url, body=encoded_msg)
