@@ -9,14 +9,14 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
         - Install the AWS command line interface (CLI). See [Installing the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) for details.
         - Install GNU Make. See [GNU Make](https://www.gnu.org/software/make/) for download information.
 2. **Configure Microsoft Teams Webhook Connector**
-    - Create a channel for a Team
-    - Next to the team name click the '...'
-    - Select 'Connectors'
-    - Search `Incoming WebHooks`.
-    - Click 'Configure' 
+    - Create a channel for a team.
+    - Next to the team name click the **...**
+    - Click **Connectors**
+    - Search `Incoming WebHooks`
+    - Click **Configure** 
     - Create a name for the Teams WebHook, ex 'TM-FSS'
-    - Click on 'Create'
-    - Copy Webhook URL
+    - Click **Create**
+    - Copy the Webhook URL.
     
     [Additional information](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)
 
@@ -136,12 +136,11 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 
 - where:
     - `<YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION>` is replaced with the name you want to give your Lambda function. Example: `FSS_Scan_Send_Teams_Notification`.
-    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::000000000000:role/FSS_Lambda_Slack_Notification_Role`.
+    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::000000000000:role/FSS_Lambda_Teams_Notification_Role`.
     - `<YOUR_ZIP_NAME>` is replaced with the name of the ZIP file you created earlier. Example: `scan-send-teams-notification`
     - `<YOUR_REGION>` is replaced by the region where the scanning bucket resides
     - `<YOUR_TEAMS_URL>` is replaced with the name of your incomming webhook MSTEAMS URL.
     - `<YOUR_TEAMS_CHANNEL>` is replaced with the name of your TEAMS channel created to receive notifications.
-    - `<YOUR_TEAMS_USERNAME>`is replaced with the subject of your TEAMS username to receive the notification on TEAMS channel
 </details>
 
 <details>
@@ -152,15 +151,14 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 
     ```bash
     FUNCTION_NAME=<YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION> ROLE_ARN=<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE> \
-    TEAMS_URL=<YOUR_TEAMS_URL> TEAMS_CHANNEL=<YOUR_TEAMS_CHANNEL> TEAMS_USERNAME=<YOUR_TEAMS_USERNAME> \
+    TEAMS_URL=<YOUR_TEAMS_URL> TEAMS_CHANNEL=<YOUR_TEAMS_CHANNEL> \
     make create-function
     ```
 - where:
     - `<YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION>` is replaced with the name you want to give your Lambda function. Example: `FSS_Scan_Send_TEAMS_Notification`.
-    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::012345678901:role/FSS_Lambda_Slack_Notification_Role`.
+    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::012345678901:role/FSS_Lambda_Teams_Notification_Role`.
     - `<YOUR_TEAMS_URL>` is replaced with the name of your incoming webhook TEAMS url 
     - `<YOUR_TEAMS_CHANNEL>` is replaced with the name of your TEAMS channel to receive notification
-    - `<YOUR_TEAMS_USERNAME>`is replaced with the subject of your TEAMS username defined to send the notitication
 </details>
 
 ## Subscribe the Lambda to the SNS topic
