@@ -143,24 +143,6 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
     - `<YOUR_TEAMS_CHANNEL>` is replaced with the name of your TEAMS channel created to receive notifications.
 </details>
 
-<details>
-<summary>Using the Makefile</summary>
-
-1. Download the [Makefile from GitHub](https://github.com/trendmicro/cloudone-filestorage-plugins/blob/master/post-scan-actions/aws-python-slack-notification/Makefile).
-2. In a shell program, enter the following GNU Make command, using backslashes (`\`) to separate lines, as shown below:
-
-    ```bash
-    FUNCTION_NAME=<YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION> ROLE_ARN=<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE> \
-    TEAMS_URL=<YOUR_TEAMS_URL> TEAMS_CHANNEL=<YOUR_TEAMS_CHANNEL> \
-    make create-function
-    ```
-- where:
-    - `<YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION>` is replaced with the name you want to give your Lambda function. Example: `FSS_Scan_Send_TEAMS_Notification`.
-    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::012345678901:role/FSS_Lambda_Teams_Notification_Role`.
-    - `<YOUR_TEAMS_URL>` is replaced with the name of your incoming webhook TEAMS url 
-    - `<YOUR_TEAMS_CHANNEL>` is replaced with the name of your TEAMS channel to receive notification
-</details>
-
 ## Subscribe the Lambda to the SNS topic
 
 <details>
