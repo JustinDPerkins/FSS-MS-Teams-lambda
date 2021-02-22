@@ -77,3 +77,5 @@ def lambda_handler(event, context):
             
             encoded_msg = json.dumps(payload).encode('utf-8')
             resp = http.request('POST',url, body=encoded_msg)
+            
+            
