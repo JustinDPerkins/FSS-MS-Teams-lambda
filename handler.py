@@ -37,10 +37,10 @@ def lambda_handler(event, context):
             
             
             payload = {
-                       "summary":"New Salesforce Lead",   
+                       "summary":"Malicious Object Detected",   
                        "sections":[
                           {
-                             "activityTitle":"A <b>Malicous object</b> has been detected!"
+                             "activityTitle":"A <b>Malicious object</b> has been detected!"
                           },
                           {
                              "facts":[
