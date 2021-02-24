@@ -21,7 +21,9 @@
             "Type": "String"
         },
         "MsTeamsUsername": {
-            "Type": "String"
+            "Type": "String",
+            "Description": "(Optional) Used only in Lambda Function tags for now.",
+            "Default": ""
         },
         "FSSSnsTopicArn": {
             "Type": "String"

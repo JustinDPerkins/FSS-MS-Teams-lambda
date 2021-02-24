@@ -79,6 +79,12 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 
 ## Deploy the Lambda
 
+You can deploy the Lambda-SNS integration using the following methods - 
+
+- AWS Console
+- AWS CLI
+- [All-in-One AWS CloudFormation Template Deployment](#aws-cloudformation-template)
+
 <details>
 <summary>Using the AWS console</summary>
 
@@ -196,3 +202,24 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
         - `<SNS_TOPIC_ARN>` is replaced with the SNS topic ARN you found earlier.
 
 </details>
+
+## All-in-One AWS CloudFormation Template Deployment
+
+The CloudFormation Template deploys the following resources in your AWS Account -
+
+- Lambda IAM Role
+- Lambda function
+- SNS Topic Subscription for the Lambda function 
+- Lambda SNS Trigger
+- CloudWatch Log Group for the Lambda function
+
+### Required Input - 
+
+| Parameter | Type | Description | Default Value |
+| --------- | ---- | ----------- | ------------- |
+| LambdaIAMRoleName | String | Name of the new FSS Lambda IAM Role | `FSS_Lambda_Teams_Notification_Role` |
+| LambdaFunctionName | String | Name of the Lambda Function Name | `FSS_Scan_Send_Teams_Notification` |
+| MsTeamsWebHookUrl | String | URL of the MS Teams Webhook. If you don't have a webhook URL, use the documentation link to generate an "`Incoming Webhook`" link for the integration - https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook Example: `https://<domain-name>.webhook.office.com/webhookb2/20****57-9**d-4**0-a**1-82************3a-a**b-4**4-a**d-d6f******e4/IncomingWebhook/ed********************35e/ee******-f**4-4**a-b**5-0a********6d`| - |
+| MsTeamsChannelName | String | Name of the MS Teams Channel you want to notify | - |
+| MsTeamsUsername | String | (Optional) Used only in Lambda Function tags for now. | "" |
+| FSSSnsTopicArn | String | In the AWS console, go to **Services > CloudFormation** > `<Your-All-in-One-Stack-Name>` > **Resources** > `<Your-Storage-Stack-Name>` > **Resources**. Scroll down to locate the  **ScanResultTopic** Logical ID. Copy the **ScanResultTopic** ARN to a temporary location. Example: `arn:aws:sns:us-east-1:000000000000:FileStorageSecurity-All-In-One-Stack-StorageStack-1IDPU1PZ2W5RN-ScanResultTopic-N8DD2JH1GRKF` | - |
