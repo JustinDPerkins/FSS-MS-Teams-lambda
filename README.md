@@ -83,7 +83,7 @@ You can deploy the Lambda-SNS integration using the following methods -
 
 - AWS Console
 - AWS CLI
-- [All-in-One AWS CloudFormation Template Deployment](#aws-cloudformation-template)
+- [All-in-One AWS CloudFormation Template Deployment](#all-in-one-aws-cloudformation-template-deployment)
 
 <details>
 <summary>Using the AWS console</summary>
