@@ -5,14 +5,16 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 ## Prerequisites
 
 1. **Install supporting tools**
-    Do one of the following:
-        - Install the AWS command line interface (CLI). See [Installing the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) for details.
-        - Install GNU Make. See [GNU Make](https://www.gnu.org/software/make/) for download information.
+
+    Do **one** of the following:
+    - Install the AWS command line interface (CLI). See [Installing the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) for details.
+    - Install GNU Make. See [GNU Make](https://www.gnu.org/software/make/) for download information.
+
 2. **Configure Microsoft Teams Webhook Connector**
-    - Create a channel for a team.
-    - Next to the team name click the **...**
+    - Create a channel for the team.
+    - Next to the team name click the **`...`** button
     - Click **Connectors**
-    - Search `Incoming WebHooks`
+    - Search `Incoming WebHook`
     - Click **Configure** 
     - Create a name for the Teams WebHook, ex 'TM-FSS'
     - Click **Create**
@@ -69,12 +71,19 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
         `aws iam create-role --role-name <YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE> --assume-role-policy-document "${LAMBDA_TRUST}"`
 
         where `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the name you want to give to the role. Example: `FSS_Lambda_Teams_Notification_Role`.
+
     2. Attach the `AWSLambdaBasicExecutionRole` managed policy to the role:
 
         `aws iam attach-role-policy --role-name FSS_Lambda_Teams_Notification_Role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole`
     </details>
 
 ## Deploy the Lambda
+
+You can deploy the Lambda-SNS integration using the following methods - 
+
+- AWS Console
+- AWS CLI
+- [All-in-One AWS CloudFormation Template Deployment](#all-in-one-aws-cloudformation-template-deployment)
 
 <details>
 <summary>Using the AWS console</summary>
@@ -114,17 +123,19 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 <details>
 <summary>Using the AWS CLI</summary>
 
-1. Download the Lambda function [handler.py file from GitHub](https://github.com/JustinDPerkins/FSS/blob/main/handler.py).
+1. Download the Lambda function [handler.py file from GitHub](https://github.com/GeorgeDavis-TM/FileStorageSecurity-MSTeams-Integration/blob/main/handler.py).
+
 2. In a shell program, create a deployment package:
 
     `zip <YOUR_ZIP_NAME>.zip handler.py`
 
-    where `<YOUR_ZIP_NAME>` is replaced with the name you want to give your Lambda function. Example: `scan-send-teams-notification`.
+    where `<YOUR_ZIP_NAME>` is replaced with the name you want to give your Lambda function. Example: `fss-scan-send-teams-notification`.
+
 3. Create the Lambda function, using backslashes (`\`) to separate the lines, as shown below:
 
     ```bash
     aws lambda create-function --function-name <YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION> \
-    --role <YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE> \
+    --role <YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE_ARN> \
     --runtime python3.8 \
     --timeout 30 \
     --memory-size 512 \
@@ -136,8 +147,8 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
 
 - where:
     - `<YOUR_FSS_SCAN_SEND_TEAMS_NOTIFICATION>` is replaced with the name you want to give your Lambda function. Example: `FSS_Scan_Send_Teams_Notification`.
-    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::000000000000:role/FSS_Lambda_Teams_Notification_Role`.
-    - `<YOUR_ZIP_NAME>` is replaced with the name of the ZIP file you created earlier. Example: `scan-send-teams-notification`
+    - `<YOUR_FSS_LAMBDA_TEAMS_NOTIFICATION_ROLE_ARN>` is replaced with the ARN of the role you previously created for the Lambda function. You can find the ARN in the AWS console under **Services > IAM > Roles** > your role > **Role ARN** field (at the top). Example: `arn:aws:iam::000000000000:role/FSS_Lambda_Teams_Notification_Role`.
+    - `<YOUR_ZIP_NAME>` is replaced with the name of the ZIP file you created earlier. Example: `fss-scan-send-teams-notification`
     - `<YOUR_REGION>` is replaced by the region where the scanning bucket resides
     - `<YOUR_TEAMS_URL>` is replaced with the name of your incomming webhook MSTEAMS URL.
     - `<YOUR_TEAMS_CHANNEL>` is replaced with the name of your TEAMS channel created to receive notifications.
@@ -176,16 +187,39 @@ After a scan occurs and a malicious file is detected, this example Lambda functi
     - Enter the following AWS CLI command to subscribe your Lamdba function to the SNS topic:
         
         `aws sns subscribe --topic-arn <SNS_TOPIC_ARN> --protocol lambda --notification-endpoint <YOUR_LAMBDA_FUNCTION_ARN> --region <YOUR_REGION>`
-    - where:
+        
+        where:
         - `<SNS_TOPIC_ARN>` is replaced with the SNS topic ARN you found earlier.
         - `<YOUR_LAMBDA_FUNCTION_ARN>` is replaced with the Lambda function ARN you found earlier.
         - `<YOUR_REGION>` is replaced by the region where the scanning bucket resides
     - Lastly, grant the SNS service permission to invoke your function.
 
         `aws lambda add-permission --function-name <FUNCTION_NAME> --region <YOUR_REGION> --statement-id sns --action lambda:InvokeFunction --principal sns.amazonaws.com --source-arn <SNS_TOPIC_ARN>`
-    - where:
+        
+        where:
         - `<FUNCTION_NAME>` is replaced by the name of the Lambda function you created previously. Example: `FSS_Scan_Send_Teams_Notification`
         - `<YOUR_REGION>` is replaced by the region where the scanning bucket resides
         - `<SNS_TOPIC_ARN>` is replaced with the SNS topic ARN you found earlier.
 
 </details>
+
+## All-in-One AWS CloudFormation Template Deployment
+
+The CloudFormation Template deploys the following resources in your AWS Account -
+
+- Lambda IAM Role
+- Lambda function
+- SNS Topic Subscription for the Lambda function 
+- Lambda SNS Trigger
+- CloudWatch Log Group for the Lambda function
+
+### Required Input - 
+
+| Parameter | Type | Description | Default Value |
+| --------- | ---- | ----------- | ------------- |
+| LambdaIAMRoleName | String | Name of the new FSS Lambda IAM Role | `FSS_Lambda_Teams_Notification_Role` |
+| LambdaFunctionName | String | Name of the Lambda Function Name | `FSS_Scan_Send_Teams_Notification` |
+| MsTeamsWebHookUrl | String | URL of the MS Teams Webhook. If you don't have a webhook URL, use the documentation link to generate an "`Incoming Webhook`" link for the integration - https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook Example: `https://<domain-name>.webhook.office.com/webhookb2/20****57-9**d-4**0-a**1-82************3a-a**b-4**4-a**d-d6f******e4/IncomingWebhook/ed********************35e/ee******-f**4-4**a-b**5-0a********6d`| - |
+| MsTeamsChannelName | String | Name of the MS Teams Channel you want to notify | - |
+| MsTeamsUsername | String | (Optional) Used only in Lambda Function tags for now. | "" |
+| FSSSnsTopicArn | String | In the AWS console, go to **Services > CloudFormation** > `<Your-All-in-One-Stack-Name>` > **Resources** > `<Your-Storage-Stack-Name>` > **Resources**. Scroll down to locate the  **ScanResultTopic** Logical ID. Copy the **ScanResultTopic** ARN to a temporary location. Example: `arn:aws:sns:us-east-1:000000000000:FileStorageSecurity-All-In-One-Stack-StorageStack-1IDPU1PZ2W5RN-ScanResultTopic-N8DD2JH1GRKF` | - |

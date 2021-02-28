@@ -1,0 +1,211 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Trend Micro File Storage Security Scan - MS Teams Connector Setup",
+    "Parameters": {
+        "LambdaIAMRoleName": {
+            "Type": "String",
+            "Default": "FSS_Lambda_Teams_Notification_Role"
+        },
+        "LambdaFunctionName": {
+            "Type": "String",
+            "Default": "FSS_Scan_Send_Teams_Notification"
+        },
+        "LambdaFunctionDescription": {
+            "Type": "String",
+            "Default": "Trend Micro File Storage Security scan result notification to MS Teams Channels"
+        },
+        "MsTeamsWebHookUrl": {
+            "Type": "String"
+        },
+        "MsTeamsChannelName": {
+            "Type": "String"
+        },
+        "MsTeamsUsername": {
+            "Type": "String",
+            "Description": "(Optional) Used only in Lambda Function tags for now.",
+            "Default": ""
+        },
+        "FSSSnsTopicArn": {
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "LambdaIAMRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "PolicyName": "LambdaLogGroupAccess"
+                    }
+                ],
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Description": "File Storage Security Lambda IAM Role for MS Teams Notifications using AWS SNS",
+                "Path": "/",
+                "RoleName": {
+                    "Ref": "LambdaIAMRoleName"
+                },
+                "Tags": [
+                    {
+                        "Key": "Owner",
+                        "Value": "TrendMicro"
+                    },
+                    {
+                        "Key": "Product",
+                        "Value": "CloudOneFileStorageSecurity"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "LambdaIAMRoleName"
+                        }
+                    }
+                ]
+            }
+        },
+        "LambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": { 
+                "Code": {
+                    "ZipFile": "import urllib3\nimport json\nimport os\nhttp = urllib3.PoolManager()\nimport textwrap\n\ndef lambda_handler(event, context):\n\turl = os.environ['TEAMS_URL']\n\tchannel = os.environ['TEAMS_CHANNEL']\n\n\tfor record in event['Records']:\n\t\t#Message details from SNS event\n\t\tmessage = json.loads(record['Sns']['Message'])\n\t\tfindings = message['scanning_result'].get('Findings')\n\n\t\t#ARN info to get AWS Account ID\narn = json.dumps(record['EventSubscriptionArn'])\n\t\taccount_id = arn.split(\":\")[4].strip()\n\n\t\tif findings:\n\t\t\tmalwares = []\n\t\t\ttypes = []\n\t\t\tfor finding in message['scanning_result']['Findings']:\n\t\t\t\tmalwares.append(finding.get('malware'))\n\t\t\t\ttypes.append(finding.get('type'))\n\n\t\t\taccount=str(account_id)\n\t\t\tmalwares=', '.join(malwares)\n\t\t\ttypes=', '.join(types)\n\t\t\tfile_url=str(message['file_url'])\n\n\t\t\tpayload = {\"summary\":\"New Salesforce Lead\",\"sections\":[{\"activityTitle\":\"A <b>Malicous object</b> has been detected!\"},{\"facts\":[{\"name\":\"Account ID:\",\"value\":account},{\"name\":\"File Name:\",\"value\":malwares},{\"name\":\"Malware Type:\",\"value\":types},{\"name\":\"Location:\",\"value\":file_url}]}],\"potentialAction\":[{\"@context\":\"http://schema.org\",\"@type\":\"ViewAction\",\"name\":\"View Object\",\"target\":[file_url]}]}\n\n\t\t\tencoded_msg = json.dumps(payload).encode('utf-8')\n\t\t\tresp = http.request('POST',url, body=encoded_msg)\n"
+                },
+                "Description": {
+                    "Ref": "LambdaFunctionDescription"
+                },
+                "FunctionName": {
+                    "Ref": "LambdaFunctionName"
+                },
+                "Handler": "index.lambda_handler",
+                "MemorySize": 128,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaIAMRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.8",
+                "Timeout": 30,
+                "Environment": {
+                    "Variables": {
+                        "TEAMS_URL": {
+                            "Ref": "MsTeamsWebHookUrl"
+                        },
+                        "TEAMS_CHANNEL": {
+                            "Ref": "MsTeamsChannelName"
+                        },
+                        "TEAMS_USERNAME": {
+                            "Ref": "MsTeamsUsername"
+                        }
+                    }
+                }
+            }
+        },
+        "LambdaLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": {
+                    "Fn::Sub": "/aws/lambda/${LambdaFunctionName}"
+                }
+            }
+        },
+        "LambdaSnsInvoke": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "LambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "SourceArn": {
+                    "Ref": "FSSSnsTopicArn"
+                },
+                "Principal": "sns.amazonaws.com"
+            }
+        },
+        "LambdaSnsSubscription": {
+            "Type" : "AWS::SNS::Subscription",
+            "Properties" : {
+                "Endpoint" : {
+                    "Fn::GetAtt": [
+                        "LambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Protocol" : "lambda",
+                "TopicArn" : {
+                    "Ref": "FSSSnsTopicArn"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "LambdaFunction": {
+            "Value": {
+                "Ref": "LambdaFunction"
+            }
+        },
+        "LambdaFunctionArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "LambdaFunction",
+                    "Arn"
+                ]
+            }
+        },
+        "LambdaLogGroup": {
+            "Value": {
+                "Ref": "LambdaLogGroup"
+            }
+        },
+        "LambdaIAMRole": {
+            "Value": {
+                "Ref": "LambdaIAMRole"
+            }
+        },
+        "LambdaIAMRoleArn": {
+            "Value": {
+                    "Fn::GetAtt": [
+                    "LambdaIAMRole",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}
