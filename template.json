@@ -21,13 +21,6 @@
                 "description": "Name of Slack Channel"
             }
         },
-        "subscriptionName": {
-            "type": "string",
-            "defaultValue": "[concat('fssslack', uniqueString(resourceGroup().id))]",
-            "metadata": {
-                "description": "Name of Azure Subscription"
-            }
-        },
         "scanResultTopicResourceID": {
             "type": "String",
             "metadata": {
@@ -52,7 +45,6 @@
         "scanResultTopicSubscriptionName": "fss-slack-subscription",
         "scanResultTopicAPIVersion": "2017-04-01",
         "functionAppAPIVersion": "2020-12-01",
-        "subscriptionName": "[parameters('subscriptionName')]",
         "scanResultSubscriptionDeployment": "scanResultSubscription"
     },
     "resources": [{
